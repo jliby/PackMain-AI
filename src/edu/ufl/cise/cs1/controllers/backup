@@ -1,0 +1,173 @@
+package edu.ufl.cise.cs1.controllers;
+import game.controllers.AttackerController;
+import game.models.*;
+import java.awt.*;
+import java.util.List;
+
+public final class StudentAttackerController implements AttackerController {
+	public void init(Game game) {
+	}
+
+	public void shutdown(Game game) {
+	}
+//
+//	public static boolean solveMaze(char [][] maze) {
+//		return mazeAux(maze, 0, 0);
+//	}
+//
+//	public static boolean mazeAux(char [][] maze, int i, int j) {
+//		if(i == 7 && j == 7) {
+//			return true;
+//		}
+//		if(i<0 || j<0 || i>7 || j>6 || maze[i][j] == '*') {
+//			return  false;
+//		}
+//		maze[i][j] = '*';
+//		int[] xDirection = {0, -1, 0, 1};
+//		int[] yDirection = {-1,0,1,0};
+//		for(int k = 0; k< 4; k++) {
+//			boolean tempResult = mazeAux(maze, i+xDirection[k], j+yDirection[k]);
+//			if(tempResult) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+	public int update(Game game, long timeDue) {
+		int action;
+		action = Game.Direction.RIGHT;
+
+		Node closestPP = null;
+		int distanceFromPP = 0;
+		if(game.getPowerPillList().size() != 0) {
+			 closestPP = game.getAttacker().getTargetNode(game.getPowerPillList(), true);
+			 distanceFromPP = game.getAttacker().getLocation().getPathDistance(closestPP);
+		}
+
+		boolean thereAreVuln = false;
+
+
+		Node closestPill = game.getAttacker().getTargetNode(game.getPillList(), true);
+		int distanceFromPill = game.getAttacker().getLocation().getPathDistance(closestPill);
+
+		boolean inLair = true;
+		int shortestDistanceDF = game.getAttacker().getLocation().getPathDistance(game.getDefender(0).getLocation());
+		Defender closestDF = game.getDefender(0);
+		Defender furthestDF = game.getDefender(3);
+		int longestDistanceDF = game.getAttacker().getLocation().getPathDistance(game.getDefender(3).getLocation());
+
+
+
+			game.getAttacker().addPathTo(game, Color.MAGENTA, closestPill);
+
+
+
+		int distanceFromPP1 = Integer.MAX_VALUE;
+		Node closestPP1 = null;
+		if(game.getPowerPillList().size() != 0) {
+			for (Node n : game.getPowerPillList()) {
+				int temp = game.getAttacker().getLocation().getPathDistance(n);
+				if (temp < distanceFromPP1) {
+					closestPP1 = n;
+					distanceFromPP1 = temp;
+				}
+			}
+		}
+		for(Defender defender: game.getDefenders()) {
+			// waits until defender are out of lair.
+			if (defender.getLairTime() <= 0) {
+				int temp = game.getAttacker().getLocation().getPathDistance(defender.getLocation());
+				if (temp < shortestDistanceDF) {
+					shortestDistanceDF = temp;
+					closestDF = defender;
+
+				}
+				if (defender.isVulnerable()) {
+					thereAreVuln = true;
+				}
+
+			}
+		}
+
+		for(Defender defender: game.getDefenders()) {
+			// waits until defender are out of lair.
+			if (defender.getLairTime() <= 0) {
+				int temp = game.getAttacker().getLocation().getPathDistance(defender.getLocation());
+				if (temp > longestDistanceDF) {
+					longestDistanceDF = temp;
+					furthestDF = defender;
+				}
+
+			}
+			if (defender.isVulnerable()) {
+				thereAreVuln = true;
+			}
+
+
+
+		}
+
+
+
+
+
+
+
+
+		// Ghost Vulnderable
+		// Ghost Vulnderable
+
+//
+//		powerpilll exist
+		if(game.getPowerPillList().size() != 0)  {
+			if(thereAreVuln) {
+				if (closestDF.isVulnerable()) {
+					if (distanceFromPP < 10) {
+						return game.getAttacker().getNextDir(closestPP1, false);
+					}
+					return game.getAttacker().getNextDir(closestDF.getLocation(), true);
+				}
+			}
+				else {
+
+					if(distanceFromPP < 5 & shortestDistanceDF > 10) {
+						return game.getAttacker().getReverse();
+					}
+
+					return game.getAttacker().getNextDir(closestPP1, true);
+				}
+
+
+		}
+
+
+
+		// no more power pills
+		if(game.getPowerPillList().size() == 0){
+
+			if(closestDF.isVulnerable()) {
+
+				return action = game.getAttacker().getNextDir(closestDF.getLocation(), true);
+			}
+			if (shortestDistanceDF < 15 ) {
+				if(shortestDistanceDF == -1) {
+					game.getAttacker().getNextDir(closestDF.getLocation(),  false);
+				}
+				if (distanceFromPill < 5) {
+					return game.getAttacker().getNextDir(closestPill, true);
+				}
+				return  game.getAttacker().getNextDir(closestDF.getLocation(), false);
+			}
+
+
+
+
+
+
+		}
+
+
+
+		return game.getAttacker().getNextDir(closestPill, true);
+	}
+}

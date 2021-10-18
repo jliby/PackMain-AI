@@ -1,2 +1,1 @@
-# PackMain-AI
-Programmed a AI for pacman.
+Temporarily hosting https://github.com/uf-cise-cs1/gatorraider
